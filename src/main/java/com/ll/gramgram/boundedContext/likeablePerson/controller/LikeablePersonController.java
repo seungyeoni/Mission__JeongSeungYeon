@@ -62,8 +62,15 @@ public class LikeablePersonController {
     }
 
     @GetMapping("/delete/{id}")
-    public String delete(Model model, @PathVariable("id") Integer id) {
+    public String delete(@PathVariable("id") Integer id) {
+        InstaMember instaMember = rq.getMember().getInstaMember();
         List<LikeablePerson> likeablePeople = likeablePersonService.findAll();
+
+        // 삭제 권한이 있는지 체크
+        if(!likeablePeople.get(id-1).getFromInstaMember().equals(instaMember)){
+            return rq.redirectWithMsg("/likeablePerson/list", "삭제 권한이 없습니다.");
+        }
+
         this.likeablePersonService.delete(likeablePeople.get(id-1));
 
         return rq.redirectWithMsg("/likeablePerson/list", "인스타유저(%s)는 호감상대에서 삭제되었습니다.".formatted(likeablePeople.get(id-1).getToInstaMember().getUsername()));

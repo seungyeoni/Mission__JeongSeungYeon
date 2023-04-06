@@ -53,6 +53,7 @@ public class LikeablePersonService {
         return likeablePersonRepository.findAll();
     }
 
+    @Transactional
     public void delete(LikeablePerson likeablePerson) {
         this.likeablePersonRepository.delete(likeablePerson);
     }
