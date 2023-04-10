@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -59,4 +60,20 @@ public class LikeablePersonController {
 
         return "usr/likeablePerson/list";
     }
+
+    @GetMapping("/delete/{id}")
+    public String delete(@PathVariable("id") Integer id) {
+        InstaMember instaMember = rq.getMember().getInstaMember();
+        List<LikeablePerson> likeablePeople = likeablePersonService.findAll();
+
+        // 삭제 권한이 있는지 체크
+        if(!likeablePeople.get(id-1).getFromInstaMember().equals(instaMember)){
+            return rq.redirectWithMsg("/likeablePerson/list", "삭제 권한이 없습니다.");
+        }
+
+        this.likeablePersonService.delete(likeablePeople.get(id-1));
+
+        return rq.redirectWithMsg("/likeablePerson/list", "인스타유저(%s)는 호감상대에서 삭제되었습니다.".formatted(likeablePeople.get(id-1).getToInstaMember().getUsername()));
+    }
+
 }
