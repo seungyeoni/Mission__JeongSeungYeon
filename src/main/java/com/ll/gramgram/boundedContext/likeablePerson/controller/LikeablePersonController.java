@@ -78,11 +78,11 @@ public class LikeablePersonController {
             return rq.historyBack("삭제 권한이 없습니다.");
         }
 
-        RsData deleteRs = likeablePersonService.delete(likeablePerson);
+        RsData deleteRsData = likeablePersonService.delete(likeablePerson);
 
-        if (deleteRs.isFail()) return rq.historyBack(deleteRs);
+        if (deleteRsData.isFail()) return rq.historyBack(deleteRsData);
 
-        return rq.redirectWithMsg("/likeablePerson/list",deleteRs);
+        return rq.redirectWithMsg("/likeablePerson/list",deleteRsData);
     }
 
 }

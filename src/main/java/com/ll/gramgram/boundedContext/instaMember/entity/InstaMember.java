@@ -40,6 +40,7 @@ public class InstaMember {
     @LazyCollection(LazyCollectionOption.EXTRA)
     @Builder.Default // @Builder 가 있으면 ` = new ArrayList<>();` 가 작동하지 않는다. 그래서 이걸 붙여야 한다.
     private List<LikeablePerson> fromLikeablePeople = new ArrayList<>();
+
     @OneToMany(mappedBy = "toInstaMember", cascade = {CascadeType.ALL})
     @OrderBy("id desc") // 정렬
     @LazyCollection(LazyCollectionOption.EXTRA)
