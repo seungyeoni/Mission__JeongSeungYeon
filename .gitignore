@@ -36,5 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 
+### Custom ###
+application-secret.yml
+
 ### private 파일 ###
 private/

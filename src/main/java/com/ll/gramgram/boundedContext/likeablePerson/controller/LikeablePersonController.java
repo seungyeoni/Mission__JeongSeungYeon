@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +26,7 @@ public class LikeablePersonController {
     private final Rq rq;
     private final LikeablePersonService likeablePersonService;
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/add")
     public String showAdd() {
         return "usr/likeablePerson/add";
@@ -37,6 +39,7 @@ public class LikeablePersonController {
         private final int attractiveTypeCode;
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/add")
     public String add(@Valid AddForm addForm) {
         RsData<LikeablePerson> createRsData = likeablePersonService.like(rq.getMember(), addForm.getUsername(), addForm.getAttractiveTypeCode());
@@ -48,6 +51,7 @@ public class LikeablePersonController {
         return rq.redirectWithMsg("/likeablePerson/list", createRsData);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/list")
     public String showList(Model model) {
         InstaMember instaMember = rq.getMember().getInstaMember();
@@ -61,19 +65,23 @@ public class LikeablePersonController {
         return "usr/likeablePerson/list";
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable("id") Integer id) {
-        InstaMember instaMember = rq.getMember().getInstaMember();
-        List<LikeablePerson> likeablePeople = likeablePersonService.findAll();
+    public String delete(@PathVariable("id") Long id) {
+        LikeablePerson likeablePerson = likeablePersonService.findById(id).orElse(null);
+
+        if (likeablePerson == null) return rq.historyBack("이미 취소된 호감입니다.");
 
         // 삭제 권한이 있는지 체크
-        if(!likeablePeople.get(id-1).getFromInstaMember().equals(instaMember)){
-            return rq.redirectWithMsg("/likeablePerson/list", "삭제 권한이 없습니다.");
+        if(!likeablePerson.getFromInstaMember().equals(rq.getMember().getInstaMember())){
+            return rq.historyBack("삭제 권한이 없습니다.");
         }
 
-        this.likeablePersonService.delete(likeablePeople.get(id-1));
+        RsData deleteRs = likeablePersonService.delete(likeablePerson);
 
-        return rq.redirectWithMsg("/likeablePerson/list", "인스타유저(%s)는 호감상대에서 삭제되었습니다.".formatted(likeablePeople.get(id-1).getToInstaMember().getUsername()));
+        if (deleteRs.isFail()) return rq.historyBack(deleteRs);
+
+        return rq.redirectWithMsg("/likeablePerson/list",deleteRs);
     }
 
 }
