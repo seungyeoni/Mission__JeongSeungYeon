@@ -32,6 +32,13 @@ public class LikeablePersonService {
 
         InstaMember fromInstaMember = member.getInstaMember();
         InstaMember toInstaMember = instaMemberService.findByUsernameOrCreate(username).getData();
+        // 해당 인스타회원이 좋아하는 사람들 목록
+        List<LikeablePerson> likeablePeople = fromInstaMember.getFromLikeablePeople();
+
+        // 호감 등록은 최대 10까지 가능.
+        if (likeablePeople.size() >= 10){
+            return RsData.of("F-3", "호감 상대 등록은 최대 10명까지 가능합니다.");
+        }
 
         LikeablePerson likeablePerson = LikeablePerson
                 .builder()
