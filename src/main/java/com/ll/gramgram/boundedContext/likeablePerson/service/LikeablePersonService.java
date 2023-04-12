@@ -32,6 +32,10 @@ public class LikeablePersonService {
 
         InstaMember fromInstaMember = member.getInstaMember();
         InstaMember toInstaMember = instaMemberService.findByUsernameOrCreate(username).getData();
+
+        /*
+        // version1. 혼자 생각하고풀어본 방법.(for문 사용)
+
         // 해당 인스타회원이 좋아하는 사람들 목록
         List<LikeablePerson> likeablePeople = fromInstaMember.getFromLikeablePeople();
 
@@ -46,15 +50,30 @@ public class LikeablePersonService {
                 }
                 String beforeAttractiveTypeDisplayName = likeablePerson.getAttractiveTypeDisplayName();
 
-                LikeablePerson modifyLikeablePerson = LikeablePerson
-                        .builder()
-                        .attractiveTypeCode(attractiveTypeCode)
-                        .build();
-
-                likeablePerson.attractiveTypeCodeModify(modifyLikeablePerson);
+                likeablePerson.modifyAttractiveTypeCode(attractiveTypeCode);
 
                 return RsData.of("S-2", "인스타 유저(%s)에 대한 호감사유를 %s에서 %s(으)로 변경합니다.".formatted(username, beforeAttractiveTypeDisplayName, likeablePerson.getAttractiveTypeDisplayName()), likeablePerson);
             }
+        }
+         */
+
+        // version2. 강사님 힌트듣고 풀어본 방법.(JPA 쿼리 메서드 사용)
+        Long countLikeablePeople = this.likeablePersonRepository.countByFromInstaMember(fromInstaMember);
+        LikeablePerson findlikeablePerson = this.likeablePersonRepository.findByFromInstaMemberAndToInstaMember(fromInstaMember, toInstaMember);
+
+        if(countLikeablePeople >= 10){
+            return RsData.of("F-3", "호감 상대 등록은 최대 10명까지 가능합니다.");
+        }
+
+        if(findlikeablePerson!=null){
+            if(findlikeablePerson.getAttractiveTypeCode()==attractiveTypeCode){
+                return RsData.of("F-4", "인스타유저(%s)는 이미 호감상대로 등록되어 있습니다.".formatted(username));
+            }
+            String beforeAttractiveTypeDisplayName = findlikeablePerson.getAttractiveTypeDisplayName();
+
+            findlikeablePerson.modifyAttractiveTypeCode(attractiveTypeCode);
+
+            return RsData.of("S-2", "인스타 유저(%s)에 대한 호감사유를 %s에서 %s(으)로 변경합니다.".formatted(username, beforeAttractiveTypeDisplayName, findlikeablePerson.getAttractiveTypeDisplayName()), findlikeablePerson);
         }
 
         LikeablePerson likeablePerson = LikeablePerson

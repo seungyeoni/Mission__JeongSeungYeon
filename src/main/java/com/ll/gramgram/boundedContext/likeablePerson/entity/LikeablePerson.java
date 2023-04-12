@@ -45,7 +45,7 @@ public class LikeablePerson {
         };
     }
 
-    public void attractiveTypeCodeModify(LikeablePerson likeablePerson){
-        this.attractiveTypeCode = likeablePerson.getAttractiveTypeCode();
+    public void modifyAttractiveTypeCode(int attractiveTypeCode){
+        this.attractiveTypeCode = attractiveTypeCode;
     }
 }
